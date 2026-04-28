@@ -1,0 +1,42 @@
+import requests
+import re
+import pandas as pd
+
+def main():
+    url = "https://www.accuweather.com/en/us/sioux-city/51105/weather-forecast/328806"
+
+    response = requests.get(url)
+    response.raise_for_status()
+    html = response.text
+
+    print(f"Downloaded {len(html)} characters\n")
+
+    # Extract data
+    temps = re.findall(r'(\d{2,3})°', html)
+    humidity = re.findall(r'Humidity\s(\d+)%', html)
+
+    # Convert
+    temps = [int(t) for t in temps]
+    humidity = [int(h) for h in humidity]
+
+    # DataFrame
+    df = pd.DataFrame({
+        "Temperature": temps[:len(humidity)],  # align lengths
+        "Humidity": humidity
+    })
+
+    print(df.head())
+
+    # Analysis
+    print("\n=== Temperature Stats ===")
+    print(f"Average: {df['Temperature'].mean():.2f}")
+    print(f"Min: {df['Temperature'].min()}")
+    print(f"Max: {df['Temperature'].max()}")
+    print(f"Std Dev: {df['Temperature'].std():.2f}")
+    print(f"Median: {df['Temperature'].median()}")
+
+    print("\n=== Humidity Stats ===")
+    print(f"Average: {df['Humidity'].mean():.2f}")
+
+if __name__ == "__main__":
+    main()
